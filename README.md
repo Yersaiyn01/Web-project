@@ -2,7 +2,8 @@
 
 ## Group Members
 1.Maralbekuly Yersaiyn
-2.Kulmuratova Anel
+2.Bazarbayeva Aidana
+3.Zhengiskyzy Perizat
 
 ## Description
 Expense Tracker is a web application that allows users to manage their expenses and income.
