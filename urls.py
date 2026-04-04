@@ -1,0 +1,7 @@
+from django.http import HttpResponse
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
+    path('', lambda request: HttpResponse("Welcome to Expense Tracker")),
+]
