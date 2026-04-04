@@ -1,0 +1,117 @@
+.logo{
+    width: 50px;
+    border-radius: 10px;
+}
+.signup-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #000000, #0f3d0f);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signup-card {
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  width: 350px;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+  color: white;
+}
+
+.signup-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #00ff88;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  background: black;
+  border: 1px solid #00ff88;
+  color: white;
+}
+
+.form-control:focus {
+  border-color: #00ff88;
+  box-shadow: 0 0 5px #00ff88;
+  background: black;
+  color: white;
+}
+
+.signup-btn {
+  width: 100%;
+  background: #00ff88;
+  color: black;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.signup-btn:hover {
+  background: #00cc66;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-link a {
+  color: #00ff88;
+  text-decoration: none;
+}
+.navbar {
+  background: #0a1f0a !important;
+  border-bottom: 1px solid rgba(0, 204, 85, 0.15);
+  padding: 0 2rem;
+  height: 56px;
+}
+
+.navbar-brand {
+  color: white !important;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: white !important;
+}
+
+/* Sign Up кнопка */
+.navbar-nav.ml-auto .nav-item:first-child .nav-link {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 6px 16px !important;
+  margin-right: 8px;
+  color: white !important;
+  transition: all 0.2s;
+}
+
+.navbar-nav.ml-auto .nav-item:first-child .nav-link:hover {
+  border-color: white;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Login кнопка */
+.navbar-nav.ml-auto .nav-item:last-child .nav-link {
+  background: #00cc55;
+  border-radius: 20px;
+  padding: 6px 16px !important;
+  color: white !important;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.navbar-nav.ml-auto .nav-item:last-child .nav-link:hover {
+  background: #00aa44;
+}
