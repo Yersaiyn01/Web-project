@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { StorageService } from '../_services/storage.service';
+import { ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class LoginComponent implements OnInit {
   form: any = {
@@ -49,20 +51,26 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const { username, password } = this.form;
+  const { username, password } = this.form;
 
-    this.authService.login(username, password).subscribe({
-      next: data => {
-        this.storageService.saveUser(data);
-        this.isLoginFailed = false;
-        this.isLoggedIn = true;
-        this.roles = this.storageService.getUser().roles;
-        this.router.navigate(['/home']);
-      },
-      error: err => {
-        this.errorMessage = err.error.message;
-        this.isLoginFailed = true;
+  this.authService.login(username, password).subscribe({
+    next: data => {
+      this.storageService.saveUser(data);
+      this.isLoginFailed = false;
+      this.isLoggedIn = true;
+      this.roles = this.storageService.getUser().roles;
+
+      const profile = localStorage.getItem('userProfile');
+      if (!profile) {
+        this.router.navigate(['/onboarding']);
+      } else {
+        this.router.navigate(['/dashboard']);
       }
-    });
-  }
+    },
+    error: err => {
+      this.errorMessage = err.error.message;
+      this.isLoginFailed = true;
+    }
+  });
+}
 }

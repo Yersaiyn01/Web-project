@@ -7,9 +7,7 @@
     </div>
 
     <ul class="navbar-nav mr-auto" routerLinkActive="active">
-      <li class="nav-item">
-        <a routerLink="home" class="nav-link">Home</a>
-      </li>
+      
 
       @if (showAdminBoard) {
         <li class="nav-item">
@@ -22,7 +20,11 @@
           <a routerLink="mod" class="nav-link">Moderator Board</a>
         </li>
       }
-
+      @if (isLoggedIn) {
+        <li class="nav-item">
+          <a routerLink="dashboard" class="nav-link">Dashboard</a>
+        </li>
+      }
       @if (isLoggedIn) {
         <li class="nav-item">
           <a routerLink="user" class="nav-link">User</a>

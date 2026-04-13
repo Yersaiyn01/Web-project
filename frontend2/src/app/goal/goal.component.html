@@ -1,0 +1,208 @@
+<div class="goal-page">
+<aside class="goal-sidebar">
+        <div class="sidebar-logo">
+      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        <span class="nav-icon">📊</span><span>Dashboard</span>
+      </a>
+      <a class="nav-item" routerLink="/reports" routerLinkActive="active">
+        <span class="nav-icon">📋</span><span>Reports</span>
+      </a>
+      <a class="nav-item" routerLink="/analytics" routerLinkActive="active">
+        <span class="nav-icon">📈</span><span>Analytics</span>
+      </a>
+      <a class="nav-item" routerLink="/ai-advisor" routerLinkActive="active">
+        <span class="nav-icon">🤖</span><span>AI Advisor</span>
+      </a>
+      <a class="nav-item active" routerLink="/goal">
+        <span class="nav-icon">🌟</span><span>Goal</span>
+      </a>
+      <a class="nav-item" routerLink="/settings" routerLinkActive="active">
+        <span class="nav-icon">⚙️</span><span>Settings</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="goal-main">
+    <div class="goal-header">
+      <h1 class="goal-title">🌟 My Goal</h1>
+      <p class="goal-sub">Track your savings and reach your dreams</p>
+    </div>
+
+    @if (!profile) {
+    <!-- ФОРМА -->
+    <div class="goal-form-card">
+      <h2 class="form-title">Set your savings goal</h2>
+
+      <div class="form-grid">
+        <div class="goal-input-group">
+          <label>Monthly salary</label>
+          <div class="goal-amount-input">
+            <span class="goal-currency">₸</span>
+            <input type="number" [(ngModel)]="goalForm.salary" placeholder="500 000" class="goal-big-input">
+          </div>
+        </div>
+
+        <div class="goal-input-group">
+          <label>Goal amount</label>
+          <div class="goal-amount-input">
+            <span class="goal-currency">₸</span>
+            <input type="number" [(ngModel)]="goalForm.amount" placeholder="1 000 000" class="goal-big-input">
+          </div>
+        </div>
+      </div>
+
+      <div class="goal-input-group">
+        <label>My dream</label>
+        <div class="dream-grid">
+          @for (d of dreamOptions; track d.label) {
+          <div class="dream-card" [class.active]="goalForm.dreamLabel === d.label"
+            (click)="goalForm.dreamLabel = d.label; goalForm.dreamEmoji = d.emoji">
+            <span class="dream-emoji">{{ d.emoji }}</span>
+            <span class="dream-label">{{ d.label }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="goal-input-group">
+        <label>Timeline</label>
+        <div class="timeline-grid">
+          @for (m of [6, 12, 24, 36]; track m) {
+          <button class="tl-btn" [class.active]="goalForm.months === m" (click)="goalForm.months = m">
+            <span class="tl-months">{{ m }}</span>
+            <span class="tl-label">months</span>
+          </button>
+          }
+        </div>
+      </div>
+
+      @if (goalForm.amount && goalForm.months) {
+      <div class="goal-calc-card">
+        <div class="calc-row">
+          <span>Monthly savings needed</span>
+          <strong>₸{{ goalMonthlySaving().toLocaleString() }}</strong>
+        </div>
+        <div class="calc-row">
+          <span>Target date</span>
+          <strong>{{ goalForm.months }} months from now</strong>
+        </div>
+      </div>
+      }
+
+      <button class="goal-save-btn" (click)="saveGoal()"
+        [disabled]="!goalForm.salary || !goalForm.dreamLabel || !goalForm.amount || !goalForm.months">
+        Start saving →
+      </button>
+    </div>
+
+    } @else {
+    <!-- АНАЛИТИКА -->
+    <div class="goal-analytics-grid">
+
+      <!-- DREAM CARD -->
+      <div class="dream-hero-card">
+        <div class="dream-hero-emoji">{{ profile.dream.emoji }}</div>
+        <div class="dream-hero-info">
+          <h2 class="dream-hero-name">{{ profile.dream.label }}</h2>
+          <p class="dream-hero-sub">{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} goal</p>
+        </div>
+        <button class="reset-goal-btn" (click)="resetGoal()">✏️ Edit</button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-card">
+        <div class="progress-header">
+          <span class="progress-title">Progress</span>
+          <span class="progress-pct">{{ goalProgress() }}%</span>
+        </div>
+        <div class="big-progress-track">
+          <div class="big-progress-fill" [style.width]="goalProgress() + '%'">
+            <span class="progress-bubble">{{ goalProgress() }}%</span>
+          </div>
+        </div>
+        <div class="progress-amounts">
+          <span>{{ profile.currency }}{{ savedAmount.toLocaleString() }} saved</span>
+          <span>{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} goal</span>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="goal-stats-row">
+        <div class="goal-stat-card">
+          <span class="gs-icon">💰</span>
+          <span class="gs-label">Salary</span>
+          <span class="gs-val">{{ profile.currency }}{{ profile.salary.toLocaleString() }}</span>
+        </div>
+        <div class="goal-stat-card">
+          <span class="gs-icon">📅</span>
+          <span class="gs-label">Monthly target</span>
+          <span class="gs-val green">{{ profile.currency }}{{ profile.monthlySaving.toLocaleString() }}</span>
+        </div>
+        <div class="goal-stat-card">
+          <span class="gs-icon">⏳</span>
+          <span class="gs-label">Months left</span>
+          <span class="gs-val">{{ monthsLeft() }}</span>
+        </div>
+        <div class="goal-stat-card">
+          <span class="gs-icon">🏦</span>
+          <span class="gs-label">Remaining</span>
+          <span class="gs-val red">{{ profile.currency }}{{ (profile.dream.amount - savedAmount).toLocaleString() }}</span>
+        </div>
+      </div>
+
+      <!-- HISTORY CHART -->
+      <div class="history-card">
+        <div class="card-header-row">
+          <span class="card-title">Savings history</span>
+          <span class="total-badge">{{ profile.currency }}{{ savedAmount.toLocaleString() }} total</span>
+        </div>
+        <div class="history-chart">
+          @for (m of monthlyHistory; track m.month) {
+          <div class="h-col">
+            <span class="h-val">{{ profile.currency }}{{ (m.saved / 1000).toFixed(0) }}k</span>
+            <div class="h-track">
+              <div class="h-fill" [style.height]="(m.saved / maxHistory() * 100) + '%'"></div>
+            </div>
+            <span class="h-label">{{ m.month }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- ADVICE + ADD SAVING -->
+      <div class="advice-add-row">
+        <div class="advice-card">
+          <span class="advice-icon">🤖</span>
+          <div>
+            <p class="advice-title">AI Advice</p>
+            <p class="advice-text">{{ goalAdvice() }}</p>
+          </div>
+        </div>
+
+        <div class="add-saving-card">
+          <p class="add-title">Add savings</p>
+          <div class="add-row">
+            <div class="add-input-wrap">
+              <span class="add-currency">{{ profile.currency }}</span>
+              <input type="number" [(ngModel)]="addSavingAmount"
+                placeholder="Enter amount" class="add-input">
+            </div>
+            <button class="add-btn" (click)="addSaving()">+ Add</button>
+          </div>
+          <div class="quick-amounts">
+            @for (a of [10000, 25000, 50000, 100000]; track a) {
+            <button class="quick-btn" (click)="addSavingAmount = a">
+              +{{ profile.currency }}{{ (a/1000).toFixed(0) }}k
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+    }
+  </main>
+</div>

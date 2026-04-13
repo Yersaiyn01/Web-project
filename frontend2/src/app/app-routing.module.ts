@@ -8,6 +8,12 @@ import { ProfileComponent } from './profile/profile.component';
 import { BoardUserComponent } from './board-user/board-user.component';
 import { BoardModeratorComponent } from './board-moderator/board-moderator.component';
 import { BoardAdminComponent } from './board-admin/board-admin.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { OnboardingComponent } from './onboarding/onboarding.component';
+import { ReportsComponent } from './reports/reports.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
+import { SettingsComponent } from './settings/settings.component';
+import { GoalComponent } from './goal/goal.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -17,6 +23,12 @@ const routes: Routes = [
   { path: 'user', component: BoardUserComponent },
   { path: 'mod', component: BoardModeratorComponent },
   { path: 'admin', component: BoardAdminComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: 'onboarding', component: OnboardingComponent },
+  { path: 'reports', component: ReportsComponent },
+  { path: 'analytics', component: AnalyticsComponent },
+  { path: 'settings', component: SettingsComponent },
+  { path: 'goal', component: GoalComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

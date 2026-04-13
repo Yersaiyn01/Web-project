@@ -1,0 +1,138 @@
+<div class="onboarding">
+  <div class="steps-indicator">
+    <div class="step" [class.active]="currentStep >= 1" [class.done]="currentStep > 1">1</div>
+    <div class="step-line" [class.done]="currentStep > 1"></div>
+    <div class="step" [class.active]="currentStep >= 2" [class.done]="currentStep > 2">2</div>
+    <div class="step-line" [class.done]="currentStep > 2"></div>
+    <div class="step" [class.active]="currentStep >= 3">3</div>
+  </div>
+
+  <!-- STEP 1: Зарплата -->
+  @if (currentStep === 1) {
+  <div class="step-card">
+    <div class="step-icon">💰</div>
+    <h2 class="step-title">Какая у вас зарплата?</h2>
+    <p class="step-sub">Это поможет нам рассчитать ваш бюджет и сбережения</p>
+
+    <div class="input-group">
+      <label>Ежемесячный доход</label>
+      <div class="amount-input">
+        <span class="currency">₸</span>
+        <input
+          type="number"
+          [(ngModel)]="salary"
+          placeholder="500 000"
+          class="big-input"
+        >
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Валюта</label>
+      <div class="currency-options">
+        <button class="cur-btn" [class.active]="currency === '₸'" (click)="currency = '₸'">₸ Тенге</button>
+        <button class="cur-btn" [class.active]="currency === '$'" (click)="currency = '$'">$ Доллар</button>
+        <button class="cur-btn" [class.active]="currency === '₽'" (click)="currency = '₽'">₽ Рубль</button>
+      </div>
+    </div>
+
+    <button class="next-btn" (click)="nextStep()" [disabled]="!salary">
+      Продолжить →
+    </button>
+  </div>
+  }
+
+  <!-- STEP 2: Мечта -->
+  @if (currentStep === 2) {
+  <div class="step-card">
+    <div class="step-icon">🌟</div>
+    <h2 class="step-title">Какова ваша мечта?</h2>
+    <p class="step-sub">На что вы хотите накопить? Мы поможем вам достичь цели</p>
+
+    <div class="dream-grid">
+      @for (d of dreamOptions; track d.label) {
+      <div class="dream-card" [class.active]="dream.label === d.label" (click)="selectDream(d)">
+        <span class="dream-emoji">{{ d.emoji }}</span>
+        <span class="dream-label">{{ d.label }}</span>
+      </div>
+      }
+    </div>
+
+    @if (dream.label === 'Другое') {
+    <div class="input-group" style="margin-top: 1rem;">
+      <label>Опишите вашу цель</label>
+      <input type="text" [(ngModel)]="dream.custom" placeholder="Например: ремонт квартиры" class="text-input">
+    </div>
+    }
+
+    <div class="input-group">
+      <label>Сумма цели</label>
+      <div class="amount-input">
+        <span class="currency">{{ currency }}</span>
+        <input type="number" [(ngModel)]="dream.amount" placeholder="1 000 000" class="big-input">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Когда хотите достичь?</label>
+      <div class="date-options">
+        <button class="cur-btn" [class.active]="dream.months === 6" (click)="dream.months = 6">6 мес</button>
+        <button class="cur-btn" [class.active]="dream.months === 12" (click)="dream.months = 12">1 год</button>
+        <button class="cur-btn" [class.active]="dream.months === 24" (click)="dream.months = 24">2 года</button>
+        <button class="cur-btn" [class.active]="dream.months === 36" (click)="dream.months = 36">3 года</button>
+      </div>
+    </div>
+
+    <div class="calc-hint" *ngIf="dream.amount && dream.months">
+      💡 Нужно откладывать <strong>{{ currency }}{{ monthlySaving() | number }}</strong> в месяц
+    </div>
+
+    <div class="btn-row">
+      <button class="back-btn" (click)="currentStep = 1">← Назад</button>
+      <button class="next-btn" (click)="nextStep()" [disabled]="!dream.label || !dream.amount || !dream.months">
+        Продолжить →
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- STEP 3: Готово -->
+  @if (currentStep === 3) {
+  <div class="step-card success-card">
+    <div class="step-icon">🎉</div>
+    <h2 class="step-title">Всё готово!</h2>
+    <p class="step-sub">Ваш финансовый профиль создан</p>
+
+    <div class="summary">
+      <div class="summary-row">
+        <span class="s-label">Зарплата</span>
+        <span class="s-val">{{ currency }}{{ salary | number }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="s-label">Мечта</span>
+        <span class="s-val">{{ dream.label === 'Другое' ? dream.custom : dream.label }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="s-label">Цель</span>
+        <span class="s-val">{{ currency }}{{ dream.amount | number }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="s-label">Срок</span>
+        <span class="s-val">{{ dream.months }} месяцев</span>
+      </div>
+      <div class="summary-row highlight-row">
+        <span class="s-label">Откладывать в месяц</span>
+        <span class="s-val green">{{ currency }}{{ monthlySaving() | number }}</span>
+      </div>
+      <div class="summary-row highlight-row">
+        <span class="s-label">Остаток на расходы</span>
+        <span class="s-val">{{ currency }}{{ salary - monthlySaving() | number }}</span>
+      </div>
+    </div>
+
+    <button class="next-btn" (click)="finish()">
+      Перейти к Dashboard →
+    </button>
+  </div>
+  }
+</div>
