@@ -1,1 +1,1039 @@
-{}
+{
+  "info": {
+    "_postman_id": "5eeff8fc-520c-4b0e-b4ab-6b8f7eb3b710",
+    "name": "Expense Tracker API",
+    "description": "Postman collection for the KBTU Expense Tracker project. Covers authentication, analytics, expenses, categories, and incomes with example requests and responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080/api"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "expenseId",
+      "value": "1"
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "incomeId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"demo1234\",\n  \"username\": \"Demo User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signup",
+                ""
+              ]
+            },
+            "description": "Creates a new user and default categories."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"demo1234\",\n  \"username\": \"Demo User\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signup/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "signup",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User registered successfully\",\n  \"email\": \"demo@example.com\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"demo1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signin/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signin",
+                ""
+              ]
+            },
+            "description": "Logs in a user and stores accessToken into collection variables."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"demo1234\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signin/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "signin",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"username\": \"demo@example.com\",\n  \"email\": \"demo@example.com\",\n  \"roles\": [\"ROLE_USER\"],\n  \"accessToken\": \"<jwt-access-token>\",\n  \"refreshToken\": \"<jwt-refresh-token>\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signout/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signout",
+                ""
+              ]
+            },
+            "description": "Returns a logout success message."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signout/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "signout",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Logged out successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                ""
+              ]
+            },
+            "description": "Returns dashboard analytics for the authenticated user."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/analytics/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "analytics",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"summary\": {\n    \"total_spent\": 148800.0,\n    \"total_income\": 7000000.0,\n    \"daily_average\": 7095.24,\n    \"month_forecast\": 212857.2,\n    \"balance\": 6851200.0,\n    \"transactions_this_week\": 2,\n    \"savings_rate\": 97.9\n  },\n  \"top_category\": {\n    \"name\": \"Food\",\n    \"amount\": 52300.0,\n    \"percent\": 35.1\n  },\n  \"weekly_spending\": [\n    {\"day\": \"Mon\", \"amount\": 13200.0},\n    {\"day\": \"Tue\", \"amount\": 0.0},\n    {\"day\": \"Wed\", \"amount\": 0.0},\n    {\"day\": \"Thu\", \"amount\": 0.0},\n    {\"day\": \"Fri\", \"amount\": 0.0},\n    {\"day\": \"Sat\", \"amount\": 0.0},\n    {\"day\": \"Sun\", \"amount\": 0.0}\n  ],\n  \"category_breakdown\": [\n    {\"name\": \"Food\", \"amount\": 52300.0, \"total\": 52300.0, \"percent\": 35.1, \"transactions\": 5},\n    {\"name\": \"Shopping\", \"amount\": 36600.0, \"total\": 36600.0, \"percent\": 24.6, \"transactions\": 2}\n  ],\n  \"month_comparison\": {\n    \"this_month\": 148800.0,\n    \"last_month\": 119100.0,\n    \"difference\": 29700.0,\n    \"percent_change\": 24.9\n  },\n  \"weekly_comparison\": {\n    \"this_week\": 13200.0,\n    \"last_week\": 43000.0,\n    \"difference\": -29800.0,\n    \"percent_change\": -69.3\n  },\n  \"transaction_comparison\": {\n    \"this_week\": 2,\n    \"last_week\": 6,\n    \"difference\": -4,\n    \"percent_change\": -66.7\n  },\n  \"savings_potential\": {\n    \"items\": [\n      {\"name\": \"Food\", \"current\": 52300.0, \"save_amount\": 10460.0},\n      {\"name\": \"Shopping\", \"current\": 36600.0, \"save_amount\": 7320.0}\n    ],\n    \"total_possible_savings\": 17780.0\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Get Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expenses",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/expenses/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expenses",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"user\": 1,\n    \"category\": \"Food\",\n    \"category_name\": \"Food\",\n    \"title\": \"Family lunch\",\n    \"amount\": \"13200.00\",\n    \"date\": \"2026-04-20\",\n    \"description\": \"Lunch at cafe\"\n  },\n  {\n    \"id\": 2,\n    \"user\": 1,\n    \"category\": \"Transport\",\n    \"category_name\": \"Transport\",\n    \"title\": \"Taxi home\",\n    \"amount\": \"2800.00\",\n    \"date\": \"2026-04-19\",\n    \"description\": \"\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Food\",\n  \"title\": \"Coffee meeting\",\n  \"amount\": 4200,\n  \"date\": \"2026-04-21\",\n  \"description\": \"Project discussion\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expenses/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expenses",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category\": \"Food\",\n  \"title\": \"Coffee meeting\",\n  \"amount\": 4200,\n  \"date\": \"2026-04-21\",\n  \"description\": \"Project discussion\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/expenses/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expenses",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 15,\n  \"user\": 1,\n  \"category\": \"Food\",\n  \"category_name\": \"Food\",\n  \"title\": \"Coffee meeting\",\n  \"amount\": \"4200.00\",\n  \"date\": \"2026-04-21\",\n  \"description\": \"Project discussion\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Food\",\n  \"title\": \"Coffee meeting updated\",\n  \"amount\": 4500,\n  \"date\": \"2026-04-21\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expenses/{{expenseId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expenses",
+                "{{expenseId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category\": \"Food\",\n  \"title\": \"Coffee meeting updated\",\n  \"amount\": 4500,\n  \"date\": \"2026-04-21\",\n  \"description\": \"Updated description\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/expenses/{{expenseId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expenses",
+                    "{{expenseId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"user\": 1,\n  \"category\": \"Food\",\n  \"category_name\": \"Food\",\n  \"title\": \"Coffee meeting updated\",\n  \"amount\": \"4500.00\",\n  \"date\": \"2026-04-21\",\n  \"description\": \"Updated description\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/{{expenseId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expenses",
+                "{{expenseId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/expenses/{{expenseId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expenses",
+                    "{{expenseId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Deleted\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "[\n  {\"id\": 1, \"user\": 1, \"name\": \"Food\"},\n  {\"id\": 2, \"user\": 1, \"name\": \"Transport\"},\n  {\"id\": 3, \"user\": 1, \"name\": \"Shopping\"}\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Travel\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Travel\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/categories/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 9,\n  \"user\": 1,\n  \"name\": \"Travel\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Transport Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categoryId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Transport Updated\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/categories/{{categoryId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "{{categoryId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 2,\n  \"user\": 1,\n  \"name\": \"Transport Updated\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                "{{categoryId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/{{categoryId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "{{categoryId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Deleted\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Incomes",
+      "item": [
+        {
+          "name": "Get Incomes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/incomes/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incomes",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/incomes/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "incomes",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"user\": 1,\n    \"source\": \"Salary\",\n    \"amount\": \"7000000.00\",\n    \"date\": \"2026-04-01\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Income",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"Salary\",\n  \"amount\": 7000000,\n  \"date\": \"2026-04-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incomes/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incomes",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"source\": \"Salary\",\n  \"amount\": 7000000,\n  \"date\": \"2026-04-01\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/incomes/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "incomes",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 2,\n  \"user\": 1,\n  \"source\": \"Salary\",\n  \"amount\": \"7000000.00\",\n  \"date\": \"2026-04-01\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Income",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"Salary + Bonus\",\n  \"amount\": 7200000,\n  \"date\": \"2026-04-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incomes/{{incomeId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incomes",
+                "{{incomeId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"source\": \"Salary + Bonus\",\n  \"amount\": 7200000,\n  \"date\": \"2026-04-01\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/incomes/{{incomeId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "incomes",
+                    "{{incomeId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"user\": 1,\n  \"source\": \"Salary + Bonus\",\n  \"amount\": \"7200000.00\",\n  \"date\": \"2026-04-01\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Income",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/incomes/{{incomeId}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incomes",
+                "{{incomeId}}",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/incomes/{{incomeId}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "incomes",
+                    "{{incomeId}}",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Deleted\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
