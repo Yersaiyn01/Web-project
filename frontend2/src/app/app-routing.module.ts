@@ -14,6 +14,7 @@ import { ReportsComponent } from './reports/reports.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
 import { SettingsComponent } from './settings/settings.component';
 import { GoalComponent } from './goal/goal.component';
+import { AiAdvisorComponent } from './ai-advisor/ai-advisor.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'onboarding', component: OnboardingComponent },
   { path: 'reports', component: ReportsComponent },
   { path: 'analytics', component: AnalyticsComponent },
+  { path: 'ai-advisor', component: AiAdvisorComponent },
   { path: 'settings', component: SettingsComponent },
   { path: 'goal', component: GoalComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
