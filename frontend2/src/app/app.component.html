@@ -1,0 +1,59 @@
+<div id="app">
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+
+    <div class="navbar-brand d-flex align-items-center">
+      <img src="assets/ExpenseTracker.png" alt="logo" style="width: 40px; margin-right: 10px;">
+      <span>expense-tracker</span>
+    </div>
+
+    <ul class="navbar-nav mr-auto" routerLinkActive="active">
+      
+
+      @if (showAdminBoard) {
+        <li class="nav-item">
+          <a routerLink="admin" class="nav-link">Admin Board</a>
+        </li>
+      }
+
+      @if (showModeratorBoard) {
+        <li class="nav-item">
+          <a routerLink="mod" class="nav-link">Moderator Board</a>
+        </li>
+      }
+      @if (isLoggedIn) {
+        <li class="nav-item">
+          <a routerLink="dashboard" class="nav-link">Dashboard</a>
+        </li>
+      }
+      @if (isLoggedIn) {
+        <li class="nav-item">
+          <a routerLink="user" class="nav-link">User</a>
+        </li>
+      }
+    </ul>
+
+    @if (!isLoggedIn) {
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a routerLink="register" class="nav-link">Sign Up</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="login" class="nav-link">Login</a>
+        </li>
+      </ul>
+    } @else {
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a routerLink="profile" class="nav-link">{{ username }}</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()">LogOut</a>
+        </li>
+      </ul>
+    }
+
+  </nav>
+
+  <router-outlet></router-outlet>  <!-- ← убрали div.container -->
+
+</div>

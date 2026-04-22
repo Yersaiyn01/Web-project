@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -5,6 +6,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-placeholder'
 
 DEBUG = True
+=======
+import environ
+from pathlib import Path
+
+env = environ.Env(
+    DEBUG=(bool,False))
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(BASE_DIR / '.env')
+
+SECRET_KEY = env('SECRET_KEY')
+
+DEBUG = env('DEBUG')
+>>>>>>> front2
 
 ALLOWED_HOSTS = []
 
@@ -31,8 +47,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+<<<<<<< HEAD
 ROOT_URLCONF = 'expense_tracker.urls'
 
+=======
+ROOT_URLCONF = 'backend.urls'
+WSGI_APPLICATION = 'backend.wsgi.application'
+>>>>>>> front2
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -56,6 +77,11 @@ DATABASES = {
     }
 }
 
+<<<<<<< HEAD
+=======
+AUTH_USER_MODEL = "accounts.User"
+
+>>>>>>> front2
 AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'en-us'
