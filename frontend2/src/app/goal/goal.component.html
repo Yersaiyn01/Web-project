@@ -1,65 +1,44 @@
 <div class="goal-page">
-<aside class="goal-sidebar">
-        <div class="sidebar-logo">
-      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
-    </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <span class="nav-icon">📊</span><span>Dashboard</span>
-      </a>
-      <a class="nav-item" routerLink="/reports" routerLinkActive="active">
-        <span class="nav-icon">📋</span><span>Reports</span>
-      </a>
-      <a class="nav-item" routerLink="/analytics" routerLinkActive="active">
-        <span class="nav-icon">📈</span><span>Analytics</span>
-      </a>
-      <a class="nav-item" routerLink="/ai-advisor" routerLinkActive="active">
-        <span class="nav-icon">🤖</span><span>AI Advisor</span>
-      </a>
-      <a class="nav-item active" routerLink="/goal">
-        <span class="nav-icon">🌟</span><span>Goal</span>
-      </a>
-      <a class="nav-item" routerLink="/settings" routerLinkActive="active">
-        <span class="nav-icon">⚙️</span><span>Settings</span>
-      </a>
-    </nav>
-  </aside>
-
-  <main class="goal-main">
-    <div class="goal-header">
-      <h1 class="goal-title">🌟 My Goal</h1>
-      <p class="goal-sub">Track your savings and reach your dreams</p>
+  <main class="goal-main centered-main">
+    <div class="goal-header centered-header">
+      <div class="goal-title-icon">🎯</div>
+      <h1 class="goal-title">Моя цель</h1>
+      <p class="goal-sub">Планируй сегодня — достигай завтра</p>
     </div>
 
     @if (!profile) {
-    <!-- ФОРМА -->
-    <div class="goal-form-card">
-      <h2 class="form-title">Set your savings goal</h2>
+    <div class="goal-form-card centered-card">
+      <h2 class="form-title centered-form-title">Установите свою цель</h2>
 
-      <div class="form-grid">
-        <div class="goal-input-group">
-          <label>Monthly salary</label>
-          <div class="goal-amount-input">
-            <span class="goal-currency">₸</span>
-            <input type="number" [(ngModel)]="goalForm.salary" placeholder="500 000" class="goal-big-input">
-          </div>
-        </div>
+      @if (!settingsSalary) {
+      <div class="goal-settings-hint warning-box">
+        Сначала добавьте ежемесячную зарплату в Settings.
+        <button class="settings-link-btn" (click)="goToSettings()">Open Settings</button>
+      </div>
+      }
 
+      <div class="form-grid single">
         <div class="goal-input-group">
-          <label>Goal amount</label>
+          <label>Сумма цели</label>
           <div class="goal-amount-input">
-            <span class="goal-currency">₸</span>
-            <input type="number" [(ngModel)]="goalForm.amount" placeholder="1 000 000" class="goal-big-input">
+            <span class="goal-currency">{{ settingsCurrencySymbol }}</span>
+            <input
+              type="number"
+              [(ngModel)]="goalForm.amount"
+              placeholder="1000000"
+              class="goal-big-input">
           </div>
         </div>
       </div>
 
       <div class="goal-input-group">
-        <label>My dream</label>
+        <label>На что копим?</label>
         <div class="dream-grid">
           @for (d of dreamOptions; track d.label) {
-          <div class="dream-card" [class.active]="goalForm.dreamLabel === d.label"
-            (click)="goalForm.dreamLabel = d.label; goalForm.dreamEmoji = d.emoji">
+          <div
+            class="dream-card"
+            [class.active]="goalForm.dreamLabel === d.label"
+            (click)="selectDream(d.label, d.emoji)">
             <span class="dream-emoji">{{ d.emoji }}</span>
             <span class="dream-label">{{ d.label }}</span>
           </div>
@@ -67,13 +46,31 @@
         </div>
       </div>
 
+      @if (goalForm.dreamLabel === 'Другое') {
+      <div class="goal-input-group custom-dream-group">
+        <label>Название вашей мечты</label>
+        <div class="goal-amount-input">
+          <span class="goal-currency">✏️</span>
+          <input
+            type="text"
+            [(ngModel)]="goalForm.customDreamName"
+            placeholder="Например: PlayStation, Бизнес, Курсы"
+            class="goal-big-input custom-dream-input">
+        </div>
+      </div>
+      }
+
       <div class="goal-input-group">
-        <label>Timeline</label>
+        <label>Срок накопления</label>
         <div class="timeline-grid">
           @for (m of [6, 12, 24, 36]; track m) {
-          <button class="tl-btn" [class.active]="goalForm.months === m" (click)="goalForm.months = m">
+          <button
+            type="button"
+            class="tl-btn"
+            [class.active]="goalForm.months === m"
+            (click)="goalForm.months = m">
             <span class="tl-months">{{ m }}</span>
-            <span class="tl-label">months</span>
+            <span class="tl-label">месяцев</span>
           </button>
           }
         </div>
@@ -82,83 +79,121 @@
       @if (goalForm.amount && goalForm.months) {
       <div class="goal-calc-card">
         <div class="calc-row">
-          <span>Monthly savings needed</span>
-          <strong>₸{{ goalMonthlySaving().toLocaleString() }}</strong>
+          <span>Нужно откладывать в месяц</span>
+          <strong>{{ settingsCurrencySymbol }}{{ goalMonthlySaving().toLocaleString() }}</strong>
         </div>
+
         <div class="calc-row">
-          <span>Target date</span>
-          <strong>{{ goalForm.months }} months from now</strong>
+          <span>Это от зарплаты</span>
+          <strong>{{ savingPercentOfSalary() }}%</strong>
         </div>
+
+        <div class="calc-row">
+          <span>Срок</span>
+          <strong>{{ goalForm.months }} мес.</strong>
+        </div>
+
+        @if (settingsSalary) {
+        <div class="salary-progress-block">
+          <div class="salary-progress-text">
+            <span>Нагрузка на зарплату</span>
+            <span>{{ savingPercentOfSalary() }}%</span>
+          </div>
+          <div class="salary-progress-track">
+            <div
+              class="salary-progress-fill"
+              [style.width.%]="savingPercentVisual()">
+            </div>
+          </div>
+          <p class="salary-advice" [class.danger]="isGoalTooExpensive()">
+            {{ salaryRecommendation() }}
+          </p>
+        </div>
+        }
       </div>
       }
 
-      <button class="goal-save-btn" (click)="saveGoal()"
-        [disabled]="!goalForm.salary || !goalForm.dreamLabel || !goalForm.amount || !goalForm.months">
-        Start saving →
+      <button
+        class="goal-save-btn"
+        (click)="saveGoal()"
+        [disabled]="isSaveDisabled()">
+        Начать копить →
       </button>
     </div>
 
     } @else {
-    <!-- АНАЛИТИКА -->
-    <div class="goal-analytics-grid">
 
-      <!-- DREAM CARD -->
+    <div class="goal-analytics-grid centered-analytics">
       <div class="dream-hero-card">
-        <div class="dream-hero-emoji">{{ profile.dream.emoji }}</div>
-        <div class="dream-hero-info">
-          <h2 class="dream-hero-name">{{ profile.dream.label }}</h2>
-          <p class="dream-hero-sub">{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} goal</p>
+        <div class="dream-hero-left">
+          <div class="dream-hero-emoji">{{ profile.dream.emoji }}</div>
+          <div class="dream-hero-info">
+            <h2 class="dream-hero-name">{{ profile.dream.label }}</h2>
+            <p class="dream-hero-sub">{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} цель</p>
+          </div>
         </div>
-        <button class="reset-goal-btn" (click)="resetGoal()">✏️ Edit</button>
+
+        <button class="reset-goal-btn" (click)="editGoal()">✏️ Изменить</button>
       </div>
 
-      <!-- PROGRESS -->
       <div class="progress-card">
         <div class="progress-header">
-          <span class="progress-title">Progress</span>
+          <span class="progress-title">Прогресс</span>
           <span class="progress-pct">{{ goalProgress() }}%</span>
         </div>
+
         <div class="big-progress-track">
           <div class="big-progress-fill" [style.width]="goalProgress() + '%'">
             <span class="progress-bubble">{{ goalProgress() }}%</span>
           </div>
         </div>
+
         <div class="progress-amounts">
-          <span>{{ profile.currency }}{{ savedAmount.toLocaleString() }} saved</span>
-          <span>{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} goal</span>
+          <span>{{ profile.currency }}{{ savedAmount.toLocaleString() }} накоплено</span>
+          <span>{{ profile.currency }}{{ profile.dream.amount.toLocaleString() }} цель</span>
         </div>
       </div>
 
-      <!-- STATS ROW -->
-      <div class="goal-stats-row">
-        <div class="goal-stat-card">
-          <span class="gs-icon">💰</span>
-          <span class="gs-label">Salary</span>
-          <span class="gs-val">{{ profile.currency }}{{ profile.salary.toLocaleString() }}</span>
-        </div>
+      <div class="goal-stats-row goal-stats-row-three">
         <div class="goal-stat-card">
           <span class="gs-icon">📅</span>
-          <span class="gs-label">Monthly target</span>
+          <span class="gs-label">Нужно в месяц</span>
           <span class="gs-val green">{{ profile.currency }}{{ profile.monthlySaving.toLocaleString() }}</span>
         </div>
+
         <div class="goal-stat-card">
           <span class="gs-icon">⏳</span>
-          <span class="gs-label">Months left</span>
+          <span class="gs-label">Осталось месяцев</span>
           <span class="gs-val">{{ monthsLeft() }}</span>
         </div>
+
         <div class="goal-stat-card">
           <span class="gs-icon">🏦</span>
-          <span class="gs-label">Remaining</span>
-          <span class="gs-val red">{{ profile.currency }}{{ (profile.dream.amount - savedAmount).toLocaleString() }}</span>
+          <span class="gs-label">Осталось накопить</span>
+          <span class="gs-val red">{{ profile.currency }}{{ remainingAmount().toLocaleString() }}</span>
         </div>
       </div>
 
-      <!-- HISTORY CHART -->
       <div class="history-card">
         <div class="card-header-row">
-          <span class="card-title">Savings history</span>
-          <span class="total-badge">{{ profile.currency }}{{ savedAmount.toLocaleString() }} total</span>
+          <div>
+            <span class="card-title">График цели</span>
+            <p class="card-subtitle">Выберите способ отображения прогресса</p>
+          </div>
+
+          <div class="chart-switcher">
+            @for (mode of chartModes; track mode.key) {
+            <button
+              class="chart-switch-btn"
+              [class.active]="selectedChart === mode.key"
+              (click)="setChart(mode.key)">
+              {{ mode.label }}
+            </button>
+            }
+          </div>
         </div>
+
+        @if (selectedChart === 'bar') {
         <div class="history-chart">
           @for (m of monthlyHistory; track m.month) {
           <div class="h-col">
@@ -170,38 +205,124 @@
           </div>
           }
         </div>
+        }
+
+        @if (selectedChart === 'line') {
+        <div class="line-chart-wrap">
+          <svg class="line-chart" viewBox="0 0 640 220" preserveAspectRatio="none">
+            <polyline
+              [attr.points]="chartAreaPoints()"
+              fill="rgba(0, 204, 85, 0.10)"
+              stroke="none">
+            </polyline>
+
+            <polyline
+              [attr.points]="chartPoints()"
+              fill="none"
+              stroke="#00c853"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+            </polyline>
+
+            @for (dot of chartDots(); track dot.month) {
+            <circle
+              [attr.cx]="dot.x"
+              [attr.cy]="dot.y"
+              r="5"
+              fill="#00c853">
+            </circle>
+            }
+
+            @for (dot of chartDots(); track dot.month) {
+            <text
+              [attr.x]="dot.x"
+              y="212"
+              text-anchor="middle"
+              class="line-axis-label">
+              {{ dot.month }}
+            </text>
+            }
+          </svg>
+        </div>
+        }
+
+        @if (selectedChart === 'ring') {
+        <div class="ring-chart-wrap">
+          <svg viewBox="0 0 160 160" width="220" height="220">
+            <circle
+              cx="80"
+              cy="80"
+              r="52"
+              fill="none"
+              stroke="#edf3ee"
+              stroke-width="14">
+            </circle>
+
+            <circle
+              cx="80"
+              cy="80"
+              r="52"
+              fill="none"
+              stroke="#00c853"
+              stroke-width="14"
+              stroke-linecap="round"
+              [attr.stroke-dasharray]="ringCircumference()"
+              [attr.stroke-dashoffset]="ringOffset()"
+              transform="rotate(-90 80 80)">
+            </circle>
+
+            <text x="80" y="77" text-anchor="middle" class="ring-label">Прогресс</text>
+            <text x="80" y="93" text-anchor="middle" class="ring-value">{{ goalProgress() }}%</text>
+          </svg>
+
+          <div class="ring-side-info">
+            <div class="ring-mini-card">
+              <span>Накоплено</span>
+              <strong>{{ profile.currency }}{{ savedAmount.toLocaleString() }}</strong>
+            </div>
+            <div class="ring-mini-card">
+              <span>Осталось</span>
+              <strong>{{ profile.currency }}{{ remainingAmount().toLocaleString() }}</strong>
+            </div>
+          </div>
+        </div>
+        }
       </div>
 
-      <!-- ADVICE + ADD SAVING -->
       <div class="advice-add-row">
         <div class="advice-card">
           <span class="advice-icon">🤖</span>
           <div>
-            <p class="advice-title">AI Advice</p>
+            <p class="advice-title">Совет</p>
             <p class="advice-text">{{ goalAdvice() }}</p>
           </div>
         </div>
 
         <div class="add-saving-card">
-          <p class="add-title">Add savings</p>
+          <p class="add-title">Добавить накопления</p>
+
           <div class="add-row">
             <div class="add-input-wrap">
               <span class="add-currency">{{ profile.currency }}</span>
-              <input type="number" [(ngModel)]="addSavingAmount"
-                placeholder="Enter amount" class="add-input">
+              <input
+                type="number"
+                [(ngModel)]="addSavingAmount"
+                placeholder="Введите сумму"
+                class="add-input">
             </div>
-            <button class="add-btn" (click)="addSaving()">+ Add</button>
+            <button class="add-btn" (click)="addSaving()">+ Добавить</button>
           </div>
+
           <div class="quick-amounts">
-            @for (a of [10000, 25000, 50000, 100000]; track a) {
-            <button class="quick-btn" (click)="addSavingAmount = a">
-              +{{ profile.currency }}{{ (a/1000).toFixed(0) }}k
+            @for (a of quickAmounts; track a) {
+            <button class="quick-btn" (click)="pickQuickAmount(a)">
+              +{{ profile.currency }}{{ (a / 1000).toFixed(0) }}k
             </button>
             }
           </div>
         </div>
       </div>
-
     </div>
     }
   </main>

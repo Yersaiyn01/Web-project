@@ -1,0 +1,217 @@
+<div class="advisor-page">
+ 
+
+  <main class="advisor-main">
+    <div class="advisor-header">
+      <div>
+        <h1 class="advisor-title">AI Advisor</h1>
+        <p class="advisor-sub">{{ advisorHeadline() }}</p>
+      </div>
+
+      <div class="advisor-controls">
+        <button class="period-chip" [class.active]="activePeriod === 'month'" (click)="setPeriod('month')">Month</button>
+        <button class="period-chip" [class.active]="activePeriod === 'quarter'" (click)="setPeriod('quarter')">Quarter</button>
+        <button class="period-chip" [class.active]="activePeriod === 'year'" (click)="setPeriod('year')">Year</button>
+      </div>
+    </div>
+
+    <div class="advisor-hero" [class.hero-good]="scoreTone() === 'good'" [class.hero-info]="scoreTone() === 'info'" [class.hero-warn]="scoreTone() === 'warn'" [class.hero-alert]="scoreTone() === 'alert'">
+      <div class="hero-copy">
+        <span class="hero-label">Financial health score</span>
+        <div class="hero-score-row">
+          <span class="hero-score">{{ healthScore() }}</span>
+          <div>
+            <div class="hero-status">{{ scoreLabel() }}</div>
+            <div class="hero-small">{{ periodTitle() }} · {{ transactionCount() }} transactions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <span class="metric-label">Spent</span>
+          <strong>{{ currency() }}{{ totalSpent().toLocaleString() }}</strong>
+        </div>
+        <div class="hero-metric">
+          <span class="metric-label">Daily avg</span>
+          <strong>{{ currency() }}{{ dailyAverage().toLocaleString() }}</strong>
+        </div>
+        <div class="hero-metric">
+          <span class="metric-label">Top category</span>
+          <strong>{{ strongestCategory() }}</strong>
+        </div>
+        <div class="hero-metric">
+          <span class="metric-label">Budget used</span>
+          <strong>{{ budgetUsagePercent() }}%</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="advisor-grid">
+      <section class="advisor-card">
+        <div class="card-title-row">
+          <h2>Smart advice</h2>
+          <span class="card-badge">{{ adviceCards().length }} ideas</span>
+        </div>
+
+        <div class="advice-list">
+          @for (tip of adviceCards(); track tip.title) {
+          <div class="advice-item" [class.good]="tip.tone === 'good'" [class.warn]="tip.tone === 'warn'" [class.alert]="tip.tone === 'alert'" [class.info]="tip.tone === 'info'">
+            <div class="advice-icon">{{ emojiForTone(tip.tone) }}</div>
+            <div class="advice-content">
+              <div class="advice-topline">
+                <strong>{{ tip.title }}</strong>
+                <span class="impact-chip">{{ tip.impact }}</span>
+              </div>
+              <p>{{ tip.text }}</p>
+              <span class="advice-action">{{ tip.action }}</span>
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+
+      <section class="advisor-card">
+        <div class="card-title-row">
+          <h2>Spending opportunities</h2>
+          <span class="card-badge">{{ currency() }}{{ totalPotentialSavings().toLocaleString() }} possible</span>
+        </div>
+
+        <div class="opportunity-list">
+          @for (item of savingsOpportunities(); track item.category) {
+          <div class="opportunity-row">
+            <div class="op-left">
+              <span class="op-emoji">{{ categoryEmoji(item.category) }}</span>
+              <div>
+                <strong>{{ item.category }}</strong>
+                <span>{{ item.percent }}% of spend</span>
+              </div>
+            </div>
+            <div class="op-middle">
+              <div class="op-track">
+                <div class="op-fill" [style.width]="item.percent + '%'"></div>
+              </div>
+            </div>
+            <div class="op-right">
+              <strong>{{ currency() }}{{ item.saving.toLocaleString() }}</strong>
+              <span>potential save</span>
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+
+      <section class="advisor-card compact-card">
+        <div class="card-title-row">
+          <h2>Quick check</h2>
+          <span class="card-badge">{{ periodTitle() }}</span>
+        </div>
+
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span>Previous period</span>
+            <strong>{{ currency() }}{{ previousSpent().toLocaleString() }}</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Change</span>
+            <strong [class.negative]="changePercent(totalSpent(), previousSpent()) > 0">{{ changePercent(totalSpent(), previousSpent()) }}%</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Average transaction</span>
+            <strong>{{ currency() }}{{ averageTransaction().toLocaleString() }}</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Free after spending</span>
+            <strong>{{ currency() }}{{ monthlyBudgetLeft().toLocaleString() }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="advisor-card compact-card">
+        <div class="card-title-row">
+          <h2>Alerts</h2>
+          <span class="card-badge">{{ alerts().length }}</span>
+        </div>
+
+        <div class="alert-list">
+          @for (item of alerts(); track item.title) {
+          <div class="alert-row" [class.good]="item.tone === 'good'" [class.warn]="item.tone === 'warn'" [class.alert]="item.tone === 'alert'">
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.text }}</span>
+          </div>
+          }
+        </div>
+      </section>
+
+      <section class="advisor-card wide-card">
+        <div class="card-title-row">
+          <h2>Goal sync</h2>
+          <span class="card-badge">{{ goalProfile ? 'active' : 'not set' }}</span>
+        </div>
+
+        @if (goalProfile) {
+        <div class="goal-sync-grid">
+          <div class="goal-sync-item">
+            <span>Dream</span>
+            <strong>{{ goalProfile.dream.label }}</strong>
+          </div>
+          <div class="goal-sync-item">
+            <span>Saved now</span>
+            <strong>{{ currency() }}{{ savedAmount.toLocaleString() }}</strong>
+          </div>
+          <div class="goal-sync-item">
+            <span>Monthly target</span>
+            <strong>{{ currency() }}{{ goalProfile.monthlySaving.toLocaleString() }}</strong>
+          </div>
+          <div class="goal-sync-item">
+            <span>Advisor view</span>
+            <strong>
+              @if (monthlyBudgetLeft() >= goalProfile.monthlySaving) {
+                On track
+              } @else {
+                Needs adjustment
+              }
+            </strong>
+          </div>
+        </div>
+        <p class="goal-sync-copy">
+          @if (monthlyBudgetLeft() >= goalProfile.monthlySaving) {
+            With your current spending, you can still fund this month’s savings target.
+          } @else {
+            Current spending leaves less than the required monthly target. Reducing one of the top categories would help keep the goal realistic.
+          }
+        </p>
+        } @else {
+        <p class="empty-copy">Create a savings goal to let the advisor compare your spending with your target.</p>
+        }
+      </section>
+
+      <section class="advisor-card wide-card">
+        <div class="card-title-row">
+          <h2>Top categories for {{ periodTitle().toLowerCase() }}</h2>
+          <span class="card-badge">{{ topCategories().length }} groups</span>
+        </div>
+
+        <div class="category-grid">
+          @for (category of topCategories(); track category.name) {
+          <div class="category-tile">
+            <div class="tile-head">
+              <span class="tile-emoji">{{ categoryEmoji(category.name) }}</span>
+              <strong>{{ category.name }}</strong>
+            </div>
+            <div class="tile-amount">{{ currency() }}{{ category.total.toLocaleString() }}</div>
+            <div class="tile-meta">
+              <span>{{ category.count }} transactions</span>
+              <span>{{ category.percent }}%</span>
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    @if (loading) {
+    <div class="advisor-loading">Loading advisor insights...</div>
+    }
+  </main>
+</div>
