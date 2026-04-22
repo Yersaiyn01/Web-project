@@ -1,0 +1,132 @@
+<div class="page">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/dashboard"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+      <a class="nav-item active" routerLink="/reports"><span class="nav-icon">📋</span><span>Reports</span></a>
+      <a class="nav-item" routerLink="/analytics"><span class="nav-icon">📈</span><span>Analytics</span></a>
+      <a class="nav-item" routerLink="/ai-advisor"><span class="nav-icon">🤖</span><span>AI Advisor</span></a>
+      <a class="nav-item" routerLink="/settings"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Reports</h1>
+        <p class="page-sub">Track and export your spending history</p>
+      </div>
+      <button class="export-btn" (click)="exportCSV()">⬆ Export</button>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-row">
+      <div class="filter-group">
+        <span class="filter-label">Period</span>
+        <div class="filter-options">
+          @for (p of periods; track p) {
+          <button class="filter-btn" [class.active]="selectedPeriod === p" (click)="selectedPeriod = p">{{ p }}</button>
+          }
+        </div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Category</span>
+        <select class="filter-select" [(ngModel)]="selectedCategory">
+          <option value="All">All</option>
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Entertainment</option>
+          <option>Shopping</option>
+          <option>Health</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Search</span>
+        <input type="text" class="filter-search" placeholder="Search transaction..." [(ngModel)]="searchQuery">
+      </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-cards">
+      <div class="sum-card">
+        <span class="sum-label">Total Spent</span>
+        <span class="sum-val red">-${{ totalSpent() }}</span>
+      </div>
+      <div class="sum-card">
+        <span class="sum-label">Transactions</span>
+        <span class="sum-val">{{ filteredExpenses().length }}</span>
+      </div>
+      <div class="sum-card">
+        <span class="sum-label">Average</span>
+        <span class="sum-val">$\{{ avgAmount() }}</span>
+      </div>
+      <div class="sum-card">
+        <span class="sum-label">Biggest</span>
+        <span class="sum-val red">-${{ maxAmount() }}</span>
+      </div>
+    </div>
+
+    <!-- COMPARISON -->
+    <div class="comparison-card">
+      <div class="comp-header">
+        <span class="comp-title">Month comparison</span>
+      </div>
+      <div class="comp-bars">
+        @for (m of comparisonData; track m.month) {
+        <div class="comp-col">
+          <div class="comp-bar-wrap">
+            <div class="comp-bar" [style.height]="m.percent + '%'"></div>
+          </div>
+          <span class="comp-label">{{ m.month }}</span>
+          <span class="comp-val">${{ m.amount }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">All transactions</span>
+        <span class="table-count">{{ filteredExpenses().length }} records</span>
+      </div>
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (exp of filteredExpenses(); track exp.id) {
+          <tr>
+            <td>
+              <div class="tx-cell">
+                <span class="tx-ico">{{ categoryEmoji(exp.category) }}</span>
+                <span>{{ exp.title }}</span>
+              </div>
+            </td>
+            <td><span class="cat-badge" [style.background]="categoryBg(exp.category)" [style.color]="categoryColor(exp.category)">{{ exp.category }}</span></td>
+            <td class="date-cell">{{ exp.date }}</td>
+            <td class="amount-cell">-${{ exp.amount }}</td>
+            <td><button class="del-btn" (click)="deleteExpense(exp.id)">✕</button></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (filteredExpenses().length === 0) {
+      <div class="empty-state">
+        <span>📭</span>
+        <p>No transactions found</p>
+      </div>
+      }
+    </div>
+  </main>
+</div>

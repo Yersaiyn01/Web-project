@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from pathlib import Path
 from datetime import timedelta
 
@@ -5,7 +6,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-123456789'
 DEBUG = True
+<<<<<<< HEAD
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+=======
+=======
+import environ
+from pathlib import Path
+
+env = environ.Env(
+    DEBUG=(bool,False))
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(BASE_DIR / '.env')
+
+SECRET_KEY = env('SECRET_KEY')
+
+DEBUG = env('DEBUG')
+>>>>>>> front2
+
+ALLOWED_HOSTS = []
+>>>>>>> 4c3ffd3692b278bc1d53d44992bc2499f3a7aa8a
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -32,8 +53,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+<<<<<<< HEAD
 ROOT_URLCONF = 'expense_tracker.urls'
 
+=======
+ROOT_URLCONF = 'backend.urls'
+WSGI_APPLICATION = 'backend.wsgi.application'
+>>>>>>> front2
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -59,6 +85,11 @@ DATABASES = {
     }
 }
 
+<<<<<<< HEAD
+=======
+AUTH_USER_MODEL = "accounts.User"
+
+>>>>>>> front2
 AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'en-us'

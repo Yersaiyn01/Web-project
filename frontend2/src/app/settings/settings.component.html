@@ -1,0 +1,226 @@
+<div class="settings-page">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" routerLink="/reports">
+        <span class="nav-icon">📋</span>
+        <span>Reports</span>
+      </a>
+      <a class="nav-item" routerLink="/analytics">
+        <span class="nav-icon">📈</span>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" routerLink="/ai-advisor">
+        <span class="nav-icon">🤖</span>
+        <span>AI Advisor</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">🌟</span>
+        <span>Goal</span>
+      </a>
+      <a class="nav-item active" routerLink="/settings">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="settings-main">
+    <div class="settings-header">
+      <h1 class="settings-title">Settings</h1>
+      <p class="settings-sub">Manage your account and preferences</p>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="settings-section">
+      <h2 class="section-title">👤 Profile</h2>
+      <div class="settings-card">
+        <div class="avatar-row">
+          <div class="avatar-circle">
+            {{ getInitials() }}
+          </div>
+          <div class="avatar-info">
+            <p class="avatar-name">{{ form.name || 'Your Name' }}</p>
+            <p class="avatar-email">{{ form.email || 'your@email.com' }}</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" [(ngModel)]="form.name" placeholder="John Doe" class="settings-input">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="form.email" placeholder="john@example.com" class="settings-input">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" [(ngModel)]="form.phone" placeholder="+7 777 000 00 00" class="settings-input">
+          </div>
+          <div class="form-group">
+            <label>Monthly Salary</label>
+            <div class="input-with-prefix">
+              <span class="prefix">{{ form.currency }}</span>
+              <input type="number" [(ngModel)]="form.salary" placeholder="500 000" class="settings-input prefix-input">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CURRENCY -->
+    <div class="settings-section">
+      <h2 class="section-title">💱 Currency</h2>
+      <div class="settings-card">
+        <div class="currency-grid">
+          @for (c of currencies; track c.code) {
+          <div class="currency-card" [class.active]="form.currency === c.symbol" (click)="form.currency = c.symbol">
+            <span class="cur-symbol">{{ c.symbol }}</span>
+            <span class="cur-name">{{ c.name }}</span>
+            <span class="cur-code">{{ c.code }}</span>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDGET LIMITS -->
+    <div class="settings-section">
+      <h2 class="section-title">💰 Budget Limits</h2>
+      <div class="settings-card">
+        <p class="section-desc">Set monthly spending limits per category. You'll get a warning when you exceed them.</p>
+        <div class="limits-list">
+          @for (cat of categories; track cat.name) {
+          <div class="limit-row">
+            <div class="limit-left">
+              <span class="limit-emoji">{{ cat.emoji }}</span>
+              <span class="limit-name">{{ cat.name }}</span>
+            </div>
+            <div class="input-with-prefix small">
+              <span class="prefix">{{ form.currency }}</span>
+              <input type="number" [(ngModel)]="limits[cat.name]" placeholder="0" class="settings-input prefix-input">
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="settings-section">
+      <h2 class="section-title">🔔 Notifications</h2>
+      <div class="settings-card">
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <p class="toggle-title">Budget exceeded</p>
+              <p class="toggle-sub">Get notified when you exceed a category limit</p>
+            </div>
+            <div class="toggle-switch" [class.on]="notifications.budget" (click)="notifications.budget = !notifications.budget">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <p class="toggle-title">Monthly report</p>
+              <p class="toggle-sub">Receive a summary at the end of each month</p>
+            </div>
+            <div class="toggle-switch" [class.on]="notifications.monthly" (click)="notifications.monthly = !notifications.monthly">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <p class="toggle-title">Goal progress</p>
+              <p class="toggle-sub">Updates on your savings goal progress</p>
+            </div>
+            <div class="toggle-switch" [class.on]="notifications.goal" (click)="notifications.goal = !notifications.goal">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THEME -->
+    <div class="settings-section">
+      <h2 class="section-title">🎨 Theme</h2>
+      <div class="settings-card">
+        <div class="theme-options">
+          <div class="theme-card" [class.active]="form.theme === 'light'" (click)="form.theme = 'light'">
+            <div class="theme-preview light-preview">
+              <div class="tp-bar"></div>
+              <div class="tp-content">
+                <div class="tp-card"></div>
+                <div class="tp-card"></div>
+              </div>
+            </div>
+            <span class="theme-label">Light</span>
+          </div>
+          <div class="theme-card" [class.active]="form.theme === 'dark'" (click)="form.theme = 'dark'">
+            <div class="theme-preview dark-preview">
+              <div class="tp-bar"></div>
+              <div class="tp-content">
+                <div class="tp-card"></div>
+                <div class="tp-card"></div>
+              </div>
+            </div>
+            <span class="theme-label">Dark</span>
+          </div>
+          <div class="theme-card" [class.active]="form.theme === 'green'" (click)="form.theme = 'green'">
+            <div class="theme-preview green-preview">
+              <div class="tp-bar"></div>
+              <div class="tp-content">
+                <div class="tp-card"></div>
+                <div class="tp-card"></div>
+              </div>
+            </div>
+            <span class="theme-label">Green</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="settings-section">
+      <h2 class="section-title danger-title">⚠️ Danger Zone</h2>
+      <div class="settings-card danger-card">
+        <div class="danger-row">
+          <div>
+            <p class="danger-label">Clear all expenses</p>
+            <p class="danger-sub">This will delete all your transaction history</p>
+          </div>
+          <button class="danger-btn outline" (click)="clearExpenses()">Clear Data</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <p class="danger-label">Reset goal</p>
+            <p class="danger-sub">Remove your savings goal and progress</p>
+          </div>
+          <button class="danger-btn outline" (click)="resetGoal()">Reset Goal</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <p class="danger-label">Delete account</p>
+            <p class="danger-sub">Permanently delete your account and all data</p>
+          </div>
+          <button class="danger-btn red">Delete Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE BUTTON -->
+    <div class="save-row">
+      @if (saved) {
+        <span class="saved-badge">✓ Saved successfully!</span>
+      }
+      <button class="save-btn" (click)="saveSettings()">Save Changes</button>
+    </div>
+  </main>
+</div>
