@@ -1,50 +1,79 @@
 <div class="page">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
-    </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item" routerLink="/dashboard"><span class="nav-icon">📊</span><span>Dashboard</span></a>
-      <a class="nav-item" routerLink="/reports"><span class="nav-icon">📋</span><span>Reports</span></a>
-      <a class="nav-item active" routerLink="/analytics"><span class="nav-icon">📈</span><span>Analytics</span></a>
-      <a class="nav-item" routerLink="/ai-advisor"><span class="nav-icon">🤖</span><span>AI Advisor</span></a>
-      <a class="nav-item" routerLink="/settings"><span class="nav-icon">⚙️</span><span>Settings</span></a>
-    </nav>
-  </aside>
-
   <main class="main">
 
-    <!-- HEADER -->
     <div class="page-header">
       <div>
         <h1 class="page-title">Analytics</h1>
-        <p class="page-sub">Deep insights into your spending habits</p>
-      </div>
-      <div class="period-tabs">
-        @for (p of periods; track p) {
-        <button class="period-btn" [class.active]="activePeriod === p" (click)="activePeriod = p">{{ p }}</button>
+        <p class="page-sub">
+          @if (selectedBar || selectedCategory) {
+            Showing
+            @if (selectedBar) {
+              <strong>{{ selectedBar }}</strong>
+            }
+            @if (selectedBar && selectedCategory) {
+              <span> · </span>
+            }
+            @if (selectedCategory) {
+              <strong>{{ selectedCategory }}</strong>
+            }
+            —
+            <span class="clear-filter" (click)="clearSelections()">show all ✕</span>
+          } @else {
+            Click on a chart element to see detailed breakdown
+          }
+        </p>
+
+        @if (selectedCategory) {
+        <div class="active-filter-row">
+          <span class="active-filter-chip">
+            {{ categoryEmoji(selectedCategory) }} {{ selectedCategory }}
+            <button class="chip-clear-btn" (click)="selectCategory(selectedCategory)">✕</button>
+          </span>
+        </div>
         }
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <div class="period-tabs">
+          @for (p of periods; track p) {
+          <button class="period-btn" [class.active]="activePeriod === p" (click)="setPeriod(p)">
+            {{ p }}
+          </button>
+          }
+        </div>
+
+        <div class="period-tabs">
+          @for (mode of chartModes; track mode.key) {
+          <button class="period-btn" [class.active]="activeChartMode === mode.key" (click)="setChartMode(mode.key)">
+            {{ mode.label }}
+          </button>
+          }
+        </div>
       </div>
     </div>
 
-    <!-- TOP STATS -->
     <div class="stats-row">
-      <div class="stat-card green-card">
+      <div
+        class="stat-card green-card"
+        [style.background]="selectedCategory ? 'linear-gradient(135deg, ' + categoryColor(selectedCategory) + ', ' + categoryTint(selectedCategory, 0.9) + ')' : null"
+      >
         <div class="stat-icon">💸</div>
         <div>
-          <span class="stat-label">Total spent</span>
-          <span class="stat-val">${{ totalSpent() }}</span>
-          <span class="stat-trend up">↑ 12% vs last month</span>
+          <span class="stat-label">{{ selectedBar ? selectedBar + ' spent' : periodTitle() }}</span>
+          <span class="stat-val">{{ money(totalSpent()) }}</span>
+          <span class="stat-trend">{{ expenses.length }} {{ transactionsLabel() }}</span>
         </div>
       </div>
+
       <div class="stat-card">
         <div class="stat-icon">📅</div>
         <div>
           <span class="stat-label">Daily average</span>
-          <span class="stat-val">${{ dailyAvg() }}</span>
+          <span class="stat-val">{{ money(dailyAvg()) }}</span>
           <span class="stat-trend">per day</span>
         </div>
       </div>
+
       <div class="stat-card">
         <div class="stat-icon">🏆</div>
         <div>
@@ -53,83 +82,310 @@
           <span class="stat-trend">{{ topCategoryPct() }}% of total</span>
         </div>
       </div>
+
       <div class="stat-card">
         <div class="stat-icon">🔮</div>
         <div>
-          <span class="stat-label">Month forecast</span>
-          <span class="stat-val red">${{ forecast() }}</span>
-          <span class="stat-trend red">projected end</span>
+          <span class="stat-label">Forecast</span>
+          <span class="stat-val red">{{ money(forecast()) }}</span>
+          <span class="stat-trend red">{{ forecastLabel() }}</span>
         </div>
       </div>
     </div>
 
-    <div class="analytics-grid">
-
-      <!-- PIE CHART -->
-      <div class="chart-card">
-        <div class="card-header-row">
-          <span class="card-title">Spending by category</span>
-        </div>
-        <div class="pie-wrapper">
-          <div class="pie-container">
-            <svg viewBox="0 0 200 200" width="190" height="190">
-              @for (slice of pieSlices(); track slice.category; let i = $index) {
-              <path
-                [attr.d]="slice.path"
-                [attr.fill]="pieColors[i % pieColors.length]"
-                stroke="white"
-                stroke-width="3"
-                class="pie-slice"
-              />
-              }
-              <circle cx="100" cy="100" r="52" fill="white"/>
-              <text x="100" y="94" text-anchor="middle" font-size="11" fill="#999">Total</text>
-              <text x="100" y="112" text-anchor="middle" font-size="16" font-weight="800" fill="#111">${{ totalSpent() }}</text>
-            </svg>
-          </div>
-          <div class="pie-legend">
-            @for (cat of categoryTotals(); track cat.name; let i = $index) {
-            <div class="legend-item">
-              <span class="legend-dot" [style.background]="pieColors[i % pieColors.length]"></span>
-              <span class="legend-name">{{ cat.name }}</span>
-              <span class="legend-pct">{{ cat.percent }}%</span>
-              <span class="legend-amt">${{ cat.total }}</span>
-            </div>
-            }
-          </div>
-        </div>
+    <div class="chart-card wide">
+      <div class="card-header-row">
+        <span class="card-title">{{ chartTitle() }}</span>
+        <span class="total-badge">{{ money(allPeriodTotal()) }} total</span>
       </div>
 
-      <!-- WEEKLY BAR CHART -->
-      <div class="chart-card">
-        <div class="card-header-row">
-          <span class="card-title">Weekly spending</span>
-          <span class="total-badge">${{ weeklyTotal() }} this week</span>
+      @if (activeChartMode === 'bar') {
+      <div class="monthly-chart">
+        @for (bar of chartBars(); track bar.label) {
+        <div
+          class="month-col"
+          [class.selected]="bar.isHighlight"
+          [class.empty]="bar.amount === 0"
+          (click)="bar.amount > 0 && selectBar(bar.label)"
+        >
+          <span class="month-amount">{{ bar.amount > 0 ? money(bar.amount) : '' }}</span>
+          <div class="month-bar-track">
+            <div
+              class="month-bar-fill"
+              [class.selected-bar]="bar.isHighlight"
+              [style.background]="bar.amount > 0 && activeAccentCategory() ? categoryTint(activeAccentCategory(), bar.isHighlight ? 0.78 : 0.18) : null"
+              [style.box-shadow]="bar.isHighlight && activeAccentCategory() ? '0 8px 18px ' + categoryTint(activeAccentCategory(), 0.18) : null"
+              [style.height]="(bar.percent || 2) + '%'"
+            ></div>
+          </div>
+          <span class="month-label" [class.selected-label]="bar.isHighlight">{{ bar.label }}</span>
         </div>
-        <div class="bar-chart-wrap">
-          @for (w of weeklyData; track w.day) {
-          <div class="bar-col">
-            <span class="bar-val">${{ w.amount }}</span>
-            <div class="bar-track">
-              <div class="bar-fill" [style.height]="w.percent + '%'" [class.today]="w.isToday"></div>
+        }
+      </div>
+      }
+
+      @if (activeChartMode === 'line') {
+      <div style="padding: 18px 8px 4px;">
+        <svg viewBox="0 0 640 220" width="100%" height="240">
+          <polyline
+            [attr.points]="lineAreaPoints()"
+            [attr.fill]="categoryTint(activeAccentCategory(), 0.12)"
+            stroke="none">
+          </polyline>
+
+          <polyline
+            [attr.points]="linePoints()"
+            fill="none"
+            [attr.stroke]="categoryColor(activeAccentCategory())"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+          </polyline>
+
+          @for (dot of lineDots(); track dot.label) {
+          <circle
+            [attr.cx]="dot.x"
+            [attr.cy]="dot.y"
+            [attr.r]="dot.isHighlight ? 7 : 5"
+            [attr.fill]="categoryColor(activeAccentCategory())"
+            style="cursor:pointer"
+            (click)="selectBar(dot.label)">
+          </circle>
+          }
+
+          @for (dot of lineDots(); track dot.label) {
+          <text
+            [attr.x]="dot.x"
+            y="214"
+            text-anchor="middle"
+            font-size="12"
+            fill="#7a7a7a">
+            {{ dot.label }}
+          </text>
+          }
+        </svg>
+      </div>
+      }
+
+      @if (activeChartMode === 'horizontal') {
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 8px 8px;">
+        @for (bar of chartBars(); track bar.label) {
+        <div
+          style="display:grid; grid-template-columns: 80px 1fr 120px; gap:12px; align-items:center; cursor:pointer;"
+          (click)="bar.amount > 0 && selectBar(bar.label)">
+          <span style="font-weight:700; color:#444;">{{ bar.label }}</span>
+          <div style="height:14px; border-radius:999px; background:#edf3ee; overflow:hidden;">
+            <div
+              [style.width]="bar.percent + '%'"
+              [style.height.%]="100"
+              [style.background]="bar.isHighlight ? categoryColor(activeAccentCategory()) : categoryTint(activeAccentCategory(), 0.65)"
+              style="border-radius:999px;">
             </div>
-            <span class="bar-day" [class.today-label]="w.isToday">{{ w.day }}</span>
+          </div>
+          <span style="font-weight:700; text-align:right;">{{ money(bar.amount) }}</span>
+        </div>
+        }
+      </div>
+      }
+
+      @if (activeChartMode === 'donut') {
+      <div class="pie-wrapper">
+        <div class="pie-container">
+          <svg viewBox="0 0 200 200" width="220" height="220">
+            @for (slice of pieSlices(); track slice.category; let i = $index) {
+            <path
+              [attr.d]="slice.path"
+              [attr.fill]="categoryColor(slice.category)"
+              stroke="white"
+              stroke-width="3"
+              class="pie-slice"
+              [style.opacity]="!selectedCategory || selectedCategory === slice.category ? 1 : 0.35"
+              (click)="selectCategory(slice.category)">
+            </path>
+            }
+            <circle cx="100" cy="100" r="52" class="pie-center-fill"></circle>
+            <text x="100" y="94" text-anchor="middle" font-size="11" class="pie-center-label">Total</text>
+            <text x="100" y="112" text-anchor="middle" font-size="15" font-weight="800" class="pie-center-value">{{ money(totalSpent()) }}</text>
+          </svg>
+        </div>
+
+        <div class="pie-legend">
+          @for (cat of categoryTotals(); track cat.name; let i = $index) {
+          <div
+            class="legend-item"
+            [style.cursor]="'pointer'"
+            [style.opacity]="!selectedCategory || selectedCategory === cat.name ? 1 : 0.45"
+            (click)="selectCategory(cat.name)">
+            <span class="legend-dot" [style.background]="categoryColor(cat.name)"></span>
+            <span class="legend-name">{{ cat.name }}</span>
+            <span class="legend-pct">{{ cat.percent }}%</span>
+            <span class="legend-amt">{{ money(cat.total) }}</span>
           </div>
           }
         </div>
       </div>
+      }
+    </div>
 
-      <!-- CATEGORY BREAKDOWN -->
-      <div class="chart-card wide">
+    @if (selectedBar && expenses.length > 0) {
+    <div class="chart-card detail-card">
+      <div class="card-header-row">
+        <span class="card-title">{{ selectedBar }} — transactions</span>
+        <span class="total-badge">{{ expenses.length }} items · {{ money(totalSpent()) }}</span>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-cats">
+          @for (cat of categoryTotals(); track cat.name; let i = $index) {
+          <div class="dc-row">
+            <div class="dc-icon" [style.background]="pieColors[i % pieColors.length] + '22'">
+              {{ categoryEmoji(cat.name) }}
+            </div>
+            <div class="dc-info">
+              <span class="dc-name">{{ cat.name }}</span>
+              <div class="dc-bar-track">
+                <div
+                  class="dc-bar-fill"
+                  [style.width]="cat.percent + '%'"
+                  [style.background]="pieColors[i % pieColors.length]">
+                </div>
+              </div>
+            </div>
+            <span class="dc-pct">{{ cat.percent }}%</span>
+            <span class="dc-amt">{{ expenseMoney(cat.total) }}</span>
+          </div>
+          }
+        </div>
+
+        <div class="detail-list">
+          @for (exp of expenses; track exp.id) {
+          <div class="dl-row">
+            <span class="dl-icon">{{ categoryEmoji(exp.category) }}</span>
+            <div class="dl-info">
+              <span class="dl-title">{{ exp.title }}</span>
+              <span class="dl-date">{{ exp.date }} · {{ exp.category }}</span>
+            </div>
+            <span class="dl-amt">{{ expenseMoney(exp.amount) }}</span>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <div class="card-header-row">
+          <span class="card-title">By category</span>
+        </div>
+
+        @if (hasCategoryFocus() && focusedCategory()) {
+        <div
+          class="focus-category-card"
+          [style.border-color]="categoryTint(focusedCategory()!.name, 0.22)"
+          [style.background]="'radial-gradient(circle at top left, ' + categoryTint(focusedCategory()!.name, 0.14) + ', transparent 36%), linear-gradient(180deg, ' + categoryTint(focusedCategory()!.name, 0.06) + ', ' + categoryTint(focusedCategory()!.name, 0.02) + ')'">
+
+          <div class="focus-top">
+            <div class="focus-icon" [style.background]="categoryTint(focusedCategory()!.name, 0.16)">
+              {{ categoryEmoji(focusedCategory()!.name) }}
+            </div>
+            <div class="focus-meta">
+              <span class="focus-label">Focused category</span>
+              <span class="focus-name">{{ focusedCategory()!.name }}</span>
+            </div>
+            <span class="focus-percent" [style.color]="categoryColor(focusedCategory()!.name)">
+              {{ focusedCategoryShare() }}%
+            </span>
+          </div>
+
+          <div class="focus-stats">
+            <div class="focus-stat">
+              <span class="focus-stat-label">Spent</span>
+              <span class="focus-stat-value">{{ money(focusedCategoryAmount()) }}</span>
+            </div>
+            <div class="focus-stat">
+              <span class="focus-stat-label">Transactions</span>
+              <span class="focus-stat-value">{{ focusedCategoryTransactions() }}</span>
+            </div>
+            <div class="focus-stat">
+              <span class="focus-stat-label">Average</span>
+              <span class="focus-stat-value">{{ money(focusedCategoryAverage()) }}</span>
+            </div>
+          </div>
+
+          <div class="focus-bar-track">
+            <div
+              class="focus-bar-fill"
+              [style.width]="focusedCategoryShare() + '%'"
+              [style.background]="'linear-gradient(90deg, ' + categoryColor(focusedCategory()!.name) + ', ' + categoryTint(focusedCategory()!.name, 0.85) + ')'">
+            </div>
+          </div>
+
+          <p class="focus-copy">
+            @if (selectedCategory) {
+              This view is focused on {{ selectedCategory }} for the selected period.
+            } @else {
+              One category covers the whole selected period right now.
+            }
+          </p>
+        </div>
+        } @else {
+        <div class="pie-wrapper">
+          <div class="pie-container">
+            <svg viewBox="0 0 200 200" width="180" height="180">
+              @for (slice of pieSlices(); track slice.category; let i = $index) {
+              <path
+                [attr.d]="slice.path"
+                [attr.fill]="categoryColor(slice.category)"
+                stroke="white"
+                stroke-width="3"
+                class="pie-slice"
+                [style.opacity]="!selectedCategory || selectedCategory === slice.category ? 1 : 0.35"
+                (click)="selectCategory(slice.category)">
+              </path>
+              }
+              <circle cx="100" cy="100" r="52" class="pie-center-fill"></circle>
+              <text x="100" y="94" text-anchor="middle" font-size="11" class="pie-center-label">Total</text>
+              <text x="100" y="112" text-anchor="middle" font-size="15" font-weight="800" class="pie-center-value">{{ money(totalSpent()) }}</text>
+            </svg>
+          </div>
+
+          <div class="pie-legend">
+            @for (cat of categoryTotals(); track cat.name; let i = $index) {
+            <div
+              class="legend-item"
+              [style.cursor]="'pointer'"
+              [style.opacity]="!selectedCategory || selectedCategory === cat.name ? 1 : 0.45"
+              (click)="selectCategory(cat.name)">
+              <span class="legend-dot" [style.background]="categoryColor(cat.name)"></span>
+              <span class="legend-name">{{ cat.name }}</span>
+              <span class="legend-pct">{{ cat.percent }}%</span>
+              <span class="legend-amt">{{ money(cat.total) }}</span>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="chart-card">
         <div class="card-header-row">
           <span class="card-title">Category breakdown</span>
           <span class="total-badge">{{ expenses.length }} transactions</span>
         </div>
+
         <div class="breakdown-list">
           @for (cat of categoryTotals(); track cat.name; let i = $index) {
-          <div class="breakdown-row">
+          <div
+            class="breakdown-row"
+            [class.breakdown-row-active]="selectedCategory === cat.name"
+            [style.border-color]="selectedCategory === cat.name ? categoryTint(cat.name, 0.22) : 'transparent'"
+            [style.background]="selectedCategory === cat.name ? categoryTint(cat.name, 0.08) : null"
+            [style.cursor]="'pointer'"
+            [style.opacity]="!selectedCategory || selectedCategory === cat.name ? 1 : 0.45"
+            (click)="selectCategory(cat.name)">
             <div class="bd-left">
-              <div class="bd-emoji-wrap" [style.background]="pieColors[i % pieColors.length] + '22'">
+              <div class="bd-emoji-wrap" [style.background]="categoryTint(cat.name, 0.14)">
                 <span class="bd-emoji">{{ categoryEmoji(cat.name) }}</span>
               </div>
               <div class="bd-info">
@@ -137,90 +393,111 @@
                 <span class="bd-sub">{{ cat.count }} transactions</span>
               </div>
             </div>
+
             <div class="bd-bar-section">
               <div class="bd-bar-track">
-                <div class="bd-bar-fill"
+                <div
+                  class="bd-bar-fill"
                   [style.width]="cat.percent + '%'"
-                  [style.background]="pieColors[i % pieColors.length]">
+                  [style.background]="categoryColor(cat.name)">
                 </div>
               </div>
               <span class="bd-pct">{{ cat.percent }}%</span>
             </div>
+
             <div class="bd-right">
-              <span class="bd-amount">-${{ cat.total }}</span>
+              <span class="bd-amount">{{ expenseMoney(cat.total) }}</span>
             </div>
           </div>
           }
         </div>
       </div>
 
-      <!-- MONTH COMPARISON -->
       <div class="chart-card">
         <div class="card-header-row">
-          <span class="card-title">Month comparison</span>
+          <span class="card-title">Comparison</span>
         </div>
+
         <div class="compare-section">
           <div class="compare-months">
             <div class="cmp-month">
-              <span class="cmp-label">This month</span>
-              <span class="cmp-amount">${{ totalSpent() }}</span>
+              <span class="cmp-label">{{ comparisonCurrentLabel() }}</span>
+              <span class="cmp-amount">{{ money(comparisonCurrentAmount()) }}</span>
             </div>
             <div class="cmp-vs">vs</div>
             <div class="cmp-month">
-              <span class="cmp-label">Last month</span>
-              <span class="cmp-amount">$380</span>
+              <span class="cmp-label">{{ comparisonPreviousLabel() }}</span>
+              <span class="cmp-amount">{{ money(comparisonPreviousAmount()) }}</span>
             </div>
           </div>
+
           <div class="cmp-bars">
             <div class="cmp-bar-row">
-              <span class="cmp-bar-label">This</span>
+              <span class="cmp-bar-label">Now</span>
               <div class="cmp-bar-track">
-                <div class="cmp-bar-fill this" [style.width]="thisMonthPct() + '%'"></div>
+                <div
+                  class="cmp-bar-fill this"
+                  [style.width]="comparisonCurrentPct() + '%'"
+                  [style.background]="categoryColor(activeAccentCategory())">
+                </div>
               </div>
-              <span class="cmp-bar-val">${{ totalSpent() }}</span>
+              <span class="cmp-bar-val">{{ money(comparisonCurrentAmount()) }}</span>
             </div>
+
             <div class="cmp-bar-row">
-              <span class="cmp-bar-label">Last</span>
+              <span class="cmp-bar-label">Prev</span>
               <div class="cmp-bar-track">
-                <div class="cmp-bar-fill last" style="width: 100%"></div>
+                <div
+                  class="cmp-bar-fill last"
+                  [style.width]="comparisonPreviousPct() + '%'"
+                  [style.background]="categoryTint(activeAccentCategory(), 0.45)">
+                </div>
               </div>
-              <span class="cmp-bar-val">$380</span>
+              <span class="cmp-bar-val">{{ money(comparisonPreviousAmount()) }}</span>
             </div>
           </div>
-          <div class="cmp-insight" [class.bad]="totalSpent() > 380" [class.good]="totalSpent() <= 380">
-            @if (totalSpent() > 380) {
-              ↑ You spent ${{ totalSpent() - 380 }} more than last month
-            } @else {
-              ↓ You saved ${{ 380 - totalSpent() }} compared to last month
-            }
+
+          <div
+            class="cmp-insight"
+            [class.bad]="comparisonInsightClass() === 'bad'"
+            [class.good]="comparisonInsightClass() === 'good'"
+            [style.background]="comparisonInsightClass() === 'bad' ? categoryTint(activeAccentCategory(), 0.12) : categoryTint(activeAccentCategory(), 0.10)"
+            [style.color]="categoryColor(activeAccentCategory())">
+            {{ comparisonInsightText() }}
           </div>
         </div>
       </div>
 
-      <!-- SAVINGS POTENTIAL -->
       <div class="chart-card">
         <div class="card-header-row">
           <span class="card-title">Savings potential</span>
+          <span class="total-badge">{{ money(totalPotentialSavings()) }}/{{ savingsPeriodLabel() }}</span>
         </div>
+
         <div class="savings-list">
           @for (tip of savingsTips(); track tip.category) {
           <div class="saving-tip">
             <span class="tip-emoji">{{ categoryEmoji(tip.category) }}</span>
             <div class="tip-info">
-              <span class="tip-title">Cut {{ tip.category }} by 20%</span>
-              <span class="tip-sub">Save ${{ tip.saving }}/month</span>
+              <span class="tip-title">Cut {{ tip.category }} by {{ tip.reductionPercent }}%</span>
+              <span class="tip-sub">Save {{ money(tip.saving) }}/{{ savingsPeriodLabel() }}</span>
             </div>
             <div class="tip-bar-track">
-              <div class="tip-bar-fill" [style.width]="tip.percent + '%'"></div>
+              <div
+                class="tip-bar-fill"
+                [style.width]="tip.percent + '%'"
+                [style.background]="'linear-gradient(90deg, ' + categoryColor(tip.category) + ', ' + categoryTint(tip.category, 0.75) + ')'">
+              </div>
             </div>
           </div>
           }
         </div>
+
         <div class="total-savings">
-          Total potential savings: <strong>${{ totalPotentialSavings() }}/mo</strong>
+          Potential savings:
+          <strong>{{ money(totalPotentialSavings()) }}/{{ savingsPeriodLabel() }}</strong>
         </div>
       </div>
-
     </div>
   </main>
 </div>
