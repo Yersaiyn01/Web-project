@@ -1,5 +1,6 @@
 <div class="dashboard">
 
+        
   <!-- GOAL MODAL -->
   @if (showGoalModal) {
   <div class="goal-overlay" (click)="showGoalModal = false">
@@ -14,28 +15,34 @@
         <div class="goal-input-group">
           <label>Monthly salary</label>
           <div class="goal-amount-input">
-            <span class="goal-currency">₸</span>
+            <span class="goal-currency">{{ currency }}</span>
             <input type="number" [(ngModel)]="goalForm.salary" placeholder="500 000" class="goal-big-input">
           </div>
         </div>
+
         <div class="goal-input-group">
           <label>My dream</label>
           <div class="dream-grid-mini">
             @for (d of dreamOptions; track d.label) {
-            <div class="dream-chip" [class.active]="goalForm.dreamLabel === d.label" (click)="goalForm.dreamLabel = d.label; goalForm.dreamEmoji = d.emoji">
+            <div
+              class="dream-chip"
+              [class.active]="goalForm.dreamLabel === d.label"
+              (click)="goalForm.dreamLabel = d.label; goalForm.dreamEmoji = d.emoji">
               <span>{{ d.emoji }}</span>
               <span>{{ d.label }}</span>
             </div>
             }
           </div>
         </div>
+
         <div class="goal-input-group">
           <label>Goal amount</label>
           <div class="goal-amount-input">
-            <span class="goal-currency">₸</span>
+            <span class="goal-currency">{{ currency }}</span>
             <input type="number" [(ngModel)]="goalForm.amount" placeholder="1 000 000" class="goal-big-input">
           </div>
         </div>
+
         <div class="goal-input-group">
           <label>Timeline</label>
           <div class="timeline-options">
@@ -44,12 +51,17 @@
             }
           </div>
         </div>
+
         @if (goalForm.amount && goalForm.months) {
         <div class="goal-hint">
-          💡 Откладывать <strong>₸{{ goalMonthlySaving() | number }}</strong> / месяц
+          💡 Откладывать <strong>{{ currency }}{{ goalMonthlySaving() | number }}</strong> / месяц
         </div>
         }
-        <button class="goal-save-btn" (click)="saveGoal()" [disabled]="!goalForm.salary || !goalForm.dreamLabel || !goalForm.amount || !goalForm.months">
+
+        <button
+          class="goal-save-btn"
+          (click)="saveGoal()"
+          [disabled]="!goalForm.salary || !goalForm.dreamLabel || !goalForm.amount || !goalForm.months">
           Save Goal →
         </button>
       </div>
@@ -64,34 +76,37 @@
           </div>
           <button class="reset-btn" (click)="resetGoal()">✏️</button>
         </div>
+
         <div class="goal-progress-section">
           <div class="goal-progress-labels">
             <span>Накоплено</span>
-            <span>{{ profile.currency }}{{ savedAmount | number }} / {{ profile.currency }}{{ profile.dream.amount | number }}</span>
+            <span>{{ goalMoney(savedAmount) }} / {{ goalMoney(profile.dream.amount) }}</span>
           </div>
           <div class="goal-progress-track">
             <div class="goal-progress-fill" [style.width]="goalProgress() + '%'"></div>
           </div>
           <div class="goal-progress-pct">{{ goalProgress() }}%</div>
         </div>
+
         <div class="goal-stats">
           <div class="goal-stat">
             <span class="gs-label">Зарплата</span>
-            <span class="gs-val">{{ profile.currency }}{{ profile.salary | number }}</span>
+            <span class="gs-val">{{ goalMoney(profile.salary) }}</span>
           </div>
           <div class="goal-stat">
             <span class="gs-label">Расходы</span>
-            <span class="gs-val red">{{ profile.currency }}{{ totalExpenses() }}</span>
+            <span class="gs-val red">{{ money(totalExpenses()) }}</span>
           </div>
           <div class="goal-stat">
             <span class="gs-label">Остаток</span>
-            <span class="gs-val green">{{ profile.currency }}{{ profile.salary - totalExpenses() | number }}</span>
+            <span class="gs-val green">{{ goalMoney((profile.salary || 0) - (analytics?.summary?.total_spent || 0)) }}</span>
           </div>
           <div class="goal-stat">
             <span class="gs-label">Нужно/мес</span>
-            <span class="gs-val">{{ profile.currency }}{{ profile.monthlySaving | number }}</span>
+            <span class="gs-val">{{ goalMoney(profile.monthlySaving) }}</span>
           </div>
         </div>
+
         <div class="goal-timeline">
           <div class="gt-row">
             <span class="gt-label">Осталось месяцев</span>
@@ -100,16 +115,20 @@
           <div class="gt-row">
             <span class="gt-label">При текущих расходах</span>
             @if (profile.salary - totalExpenses() > 0) {
-              <span class="gt-val green">{{ Math.ceil((profile.dream.amount - savedAmount) / (profile.salary - totalExpenses())) }} мес.</span>
+              <span class="gt-val green">
+                {{ Math.ceil(((profile.dream.amount || 0) - (savedAmount || 0)) / Math.max(1, ((profile.salary || 0) - (analytics?.summary?.total_spent || 0)))) }} мес.
+              </span>
             } @else {
               <span class="gt-val red">Расходы превышают доход!</span>
             }
           </div>
         </div>
+
         <div class="goal-advice">
           <span class="advice-icon">🤖</span>
           <p class="advice-text">{{ goalAdvice() }}</p>
         </div>
+
         <div class="add-saving-row">
           <input type="number" [(ngModel)]="addSavingAmount" placeholder="Добавить накопление..." class="saving-input">
           <button class="add-saving-btn" (click)="addSaving()">+ Добавить</button>
@@ -120,54 +139,47 @@
   </div>
   }
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <img src="assets/ExpenseTracker.png" alt="logo" style="width:32px; border-radius:8px;">
-    </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item" routerLink="/reports" routerLinkActive="active">
-        <span class="nav-icon">📋</span>
-        <span>Reports</span>
-      </a>
-      <a class="nav-item" routerLink="/analytics" routerLinkActive="active">
-        <span class="nav-icon">📈</span>
-        <span>Analytics</span>
-      </a>
-      <a class="nav-item" routerLink="/ai-advisor" routerLinkActive="active">
-        <span class="nav-icon">🤖</span>
-        <span>AI Advisor</span>
-      </a>
-     
-      <a class="nav-item" routerLink="/settings" routerLinkActive="active">
-        <span class="nav-icon">⚙️</span>
-        <span>Settings</span>
-      </a>
-       <a class="nav-item goal-nav" routerLink="/goal" routerLinkActive="active">
-  <span class="nav-icon">🌟</span>
-  <span>Goal</span>
-  @if (profile) {
-    <span class="goal-pct-badge">{{ goalProgress() }}%</span>
-  }
-  </a>
-    </nav>
-  </aside>
-
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <div class="topbar-left">
-        <h1 class="page-title">Analytics Overview</h1>
-        <p class="page-sub">Track your expenses, income and financial goals</p>
-        <div class="topbar-actions">
-          <button class="btn-primary-dash">📊 View Report</button>
-          <button class="btn-outline-dash">⬆ Export</button>
-        </div>
-      </div>
+     <div class="topbar-actions">
+  <button class="btn-primary-dash" (click)="viewReport()">📊 View Report</button>
+
+  <div class="export-wrapper" (click)="$event.stopPropagation()">
+    <button class="btn-outline-dash" (click)="toggleExportMenu($event)">⬆ Export</button>
+
+    @if (exportOpen) {
+    <div class="export-menu">
+      <button class="export-menu-item" (click)="exportPDF()">Export PDF</button>
+      <button class="export-menu-item" (click)="exportCSV()">Export CSV</button>
+      <button class="export-menu-item" (click)="printReport()">Print</button>
+    </div>
+    }
+  </div>
+
+  <button class="kaspi-btn" (click)="openKaspiImport()">Kaspi Import</button>
+
+  <input
+    #kaspiFileInput
+    type="file"
+    accept=".csv,.pdf,.txt"
+    hidden
+    (change)="onKaspiFileSelected($event)">
+</div>
+
+@if (kaspiImporting) {
+  <div class="import-note">Importing Kaspi file...</div>
+}
+
+@if (kaspiImportMessage) {
+  <div class="import-note success">{{ kaspiImportMessage }}</div>
+}
+
+@if (kaspiImportError) {
+  <div class="import-note error">{{ kaspiImportError }}</div>
+}
+      
+
       <div class="topbar-right">
         <div class="search-box">
           <span>🔍</span>
@@ -183,21 +195,23 @@
       <div class="stat-card">
         <div class="stat-top">
           <span class="stat-label">Total Expenses</span>
-          <span class="stat-trend up">+8.5%</span>
+          <span class="stat-trend" [ngClass]="trendClass(monthTrend())">{{ trendLabel(monthTrend()) }}</span>
         </div>
-        <div class="stat-value">${{ totalExpenses() }}</div>
+        <div class="stat-value">{{ money(totalExpenses()) }}</div>
         <div class="stat-sub">this month</div>
         <div class="mini-chart green"></div>
       </div>
+
       <div class="stat-card">
         <div class="stat-top">
           <span class="stat-label">Transactions</span>
-          <span class="stat-trend up">+8.5%</span>
+          <span class="stat-trend" [ngClass]="trendClass(transactionTrend())">{{ trendLabel(transactionTrend()) }}</span>
         </div>
-        <div class="stat-value">{{ expenses.length }}</div>
+        <div class="stat-value">{{ totalTransactionsThisWeek() }}</div>
         <div class="stat-sub">this week</div>
         <div class="mini-chart lightgreen"></div>
       </div>
+
       <div class="stat-card">
         <div class="stat-top">
           <span class="stat-label">Savings Rate</span>
@@ -206,8 +220,15 @@
         <div class="donut-wrapper">
           <svg viewBox="0 0 80 80" width="70" height="70">
             <circle cx="40" cy="40" r="30" fill="none" stroke="#e0f0e0" stroke-width="10"/>
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#00cc55" stroke-width="10"
-              [attr.stroke-dasharray]="savingsRate() * 1.885 + ' 188.5'" stroke-dashoffset="47"
+            <circle
+              cx="40"
+              cy="40"
+              r="30"
+              fill="none"
+              stroke="#00cc55"
+              stroke-width="10"
+              [attr.stroke-dasharray]="savingsRate() * 1.885 + ' 188.5'"
+              stroke-dashoffset="47"
               stroke-linecap="round"/>
             <text x="40" y="45" text-anchor="middle" font-size="14" font-weight="700" fill="#111">{{ savingsRate() }}%</text>
           </svg>
@@ -218,30 +239,31 @@
     <div class="middle-row">
       <div class="chart-card wide">
         <div class="card-header">
-          <span class="card-title">Sales Performance</span>
-          <span class="trend-badge">↑ +2.1%</span>
+          <span class="card-title">Weekly Spending</span>
+          <span class="trend-badge">{{ trendLabel(weeklyTrend()) }}</span>
         </div>
         <div class="bar-chart">
-          @for (item of monthlyData; track item.month) {
+          @for (item of weeklyData; track item.day) {
           <div class="bar-col">
             <div class="bar" [style.height]="item.percent + '%'"></div>
-            <span class="bar-label">{{ item.month }}</span>
+            <span class="bar-label">{{ item.day }}</span>
           </div>
           }
         </div>
       </div>
+
       <div class="chart-card">
         <div class="card-header">
           <span class="card-title">Top Categories</span>
         </div>
         <div class="category-list">
-          @for (cat of categoryTotals(); track cat.name) {
+          @for (cat of topCategories(); track cat.name) {
           <div class="cat-row">
             <span class="cat-name">{{ cat.name }}</span>
             <div class="cat-track">
               <div class="cat-fill" [style.width]="cat.percent + '%'"></div>
             </div>
-            <span class="cat-amount">${{ cat.total }}</span>
+            <span class="cat-amount">{{ money(cat.total) }}</span>
           </div>
           }
         </div>
@@ -254,30 +276,38 @@
           <span class="card-title">Recent Transactions</span>
           <button class="btn-small" (click)="showForm = !showForm">+ Add</button>
         </div>
+
         @if (showForm) {
         <div class="add-form">
           <input type="text" [(ngModel)]="newExpense.title" placeholder="Title" class="form-inp">
           <input type="number" [(ngModel)]="newExpense.amount" placeholder="Amount" class="form-inp">
           <select [(ngModel)]="newExpense.category" class="form-inp">
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Entertainment</option>
-            <option>Shopping</option>
-            <option>Health</option>
-            <option>Other</option>
+            <option [ngValue]="null" disabled>Select category</option>
+            @for (category of categories; track category.id) {
+            <option [value]="category.name">{{ category.name }}</option>
+            }
           </select>
           <button class="btn-primary-dash" (click)="addExpense()">Save</button>
         </div>
+
+        @if (expenseErrorMessage) {
+        <div class="form-feedback" style="color:#c62828; margin-top:10px;">{{ expenseErrorMessage }}</div>
         }
+
+        @if (expenseSuccessMessage) {
+        <div class="form-feedback" style="color:#1d7a46; margin-top:10px;">{{ expenseSuccessMessage }}</div>
+        }
+        }
+
         <div class="transactions">
-          @for (exp of expenses; track exp.id) {
+          @for (exp of filteredExpenses(); track exp.id) {
           <div class="tx-row">
             <div class="tx-icon" [style.background]="categoryColor(exp.category)">{{ categoryEmoji(exp.category) }}</div>
             <div class="tx-info">
               <span class="tx-title">{{ exp.title }}</span>
-              <span class="tx-cat">{{ exp.category }}</span>
+              <span class="tx-cat">{{ exp.category_name || exp.category }}</span>
             </div>
-            <span class="tx-amount">-${{ exp.amount }}</span>
+            <span class="tx-amount">{{ expenseMoney(exp.amount) }}</span>
             <button class="tx-delete" (click)="deleteExpense(exp.id)">✕</button>
           </div>
           }
@@ -294,22 +324,16 @@
             <div class="budget-item">
               <span class="b-dot completed"></span>
               <span>Completed</span>
-              <span class="b-val">65%</span>
+              <span class="b-val">{{ budgetCompleted() }}%</span>
             </div>
             <div class="budget-item">
               <span class="b-dot pending-dot"></span>
               <span>Pending</span>
-              <span class="b-val">35%</span>
+              <span class="b-val">{{ budgetPending() }}%</span>
             </div>
           </div>
         </div>
-        <div class="chart-card">
-          <div class="card-header">
-            <span class="card-title">AI Advisor</span>
-          </div>
-          <p class="ai-tip">{{ aiTip }}</p>
-          <a routerLink="/ai-advisor" class="ai-link">Get full advice →</a>
-        </div>
+
         <div class="chart-card summary-card">
           <div class="summary-row">
             <div>
@@ -318,7 +342,7 @@
             </div>
             <div>
               <p class="s-label">Total Spent</p>
-              <p class="s-val green">${{ totalExpenses() }}</p>
+              <p class="s-val green">{{ money(totalExpenses()) }}</p>
             </div>
           </div>
         </div>
